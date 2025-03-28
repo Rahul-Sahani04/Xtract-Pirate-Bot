@@ -1,10 +1,14 @@
 import logging
 import asyncio
-from datetime import datetime
-from typing import Dict, Optional
+import signal
+from datetime import datetime, timedelta
+from typing import Dict, Optional, Any
+import psutil
+import json
 from pathlib import Path
+from aiohttp import web
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, MessageHandler, CallbackQueryHandler,
     filters, ContextTypes
@@ -23,6 +27,9 @@ logging.basicConfig(
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+
+# Initialize bot state
+startup_time = datetime.now()
 
 # Initialize downloaders
 youtube_dl = YouTubeDownloader(download_path=config.YOUTUBE_DOWNLOAD_PATH)
@@ -68,7 +75,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/help - Show this help message\n"
         "/stats - Show your download statistics\n"
         "/history - View download history\n"
-        "/settings - Configure download preferences"
+        "/settings - Configure download preferences\n"
+        "/health - Get bot health status as JSON"
     )
 
 async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -171,51 +179,99 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'platform': platform,
             'success': True,
             'title': result.get('title', 'Unknown'),
-            'file_size': FileManager.get_file_size(Path(result['path']))
+            'file_size': sum(FileManager.get_file_size(Path(p)) for p in result.get('paths', []))
+            if result.get('paths')
+            else FileManager.get_file_size(Path(result['path']))
+            if result.get('path')
+            else 0
         })
 
-        # Send file
-        file_path = Path(result['path'])
         try:
-            await status_message.edit_text("📤 Sending file...")
-            
-            # Ensure filename has consistent format
-            title = FileManager.sanitize_filename(result.get('title', 'Unknown'))
-            original_path = file_path
-            file_path = original_path.parent / f"{title}{original_path.suffix}"
-            
-            # Rename if necessary
-            if original_path != file_path and original_path.exists():
-                original_path.rename(file_path)
-            
-            # Open file in binary mode for sending
-            with open(file_path, 'rb') as file:
-                # Send file based on type
-                if file_path.suffix.lower() in ['.mp4', '.webm']:
-                    await update.message.reply_video(
-                        video=file,
-                        caption=f"📹 {result.get('title', 'Video')}"
-                    )
-                elif file_path.suffix.lower() in ['.mp3', '.m4a', '.wav']:
-                    await update.message.reply_audio(
-                        audio=file,
-                        caption=f"🎵 {result.get('title', 'Audio')}"
-                    )
-                else:
-                    await update.message.reply_document(
-                        document=file,
-                        caption=f"📄 {result.get('title', 'File')}"
-                    )
+            if 'paths' in result:  # Multiple files (e.g., Pinterest)
+                await status_message.edit_text("📤 Sending files...")
+                file_paths = [Path(p) for p in result['paths']]
+                total_files = len(file_paths)
+                
+                for idx, file_path in enumerate(file_paths, 1):
+                    try:
+                        # Ensure filename has consistent format
+                        title = FileManager.sanitize_filename(result.get('title', 'Unknown'))
+                        file_name = f"{title}_part_{idx}{file_path.suffix}"
+                        new_path = file_path.parent / file_name
 
-            # Cleanup if enabled
-            if config.CLEANUP_AFTER_SEND:
-                file_path.unlink()
+                        # Rename if necessary
+                        if file_path != new_path and file_path.exists():
+                            file_path.rename(new_path)
 
-            await status_message.delete()
+                        # Open file in binary mode for sending
+                        with open(new_path, 'rb') as file:
+                            caption = f"📄 {result.get('title', 'File')} ({idx}/{total_files})"
+                            if new_path.suffix.lower() in ['.mp4', '.webm']:
+                                await update.message.reply_video(
+                                    video=file,
+                                    caption=caption
+                                )
+                            elif new_path.suffix.lower() in ['.mp3', '.m4a', '.wav']:
+                                await update.message.reply_audio(
+                                    audio=file,
+                                    caption=caption
+                                )
+                            else:
+                                await update.message.reply_document(
+                                    document=file,
+                                    caption=caption
+                                )
 
-        except FileNotFoundError:
+                        # Cleanup if enabled
+                        if config.CLEANUP_AFTER_SEND:
+                            new_path.unlink()
+
+                    except Exception as e:
+                        logger.error(f"Error sending file {idx}: {str(e)}", exc_info=True)
+                        await status_message.edit_text(f"❌ Error sending file {idx}: {str(e)}")
+                        return
+
+                await status_message.edit_text(f"✅ Successfully sent {total_files} files!")
+
+            else:  # Single file
+                file_path = Path(result['path'])
+                await status_message.edit_text("📤 Sending file...")
+                
+                # Ensure filename has consistent format
+                title = FileManager.sanitize_filename(result.get('title', 'Unknown'))
+                new_path = file_path.parent / f"{title}{file_path.suffix}"
+                
+                # Rename if necessary
+                if file_path != new_path and file_path.exists():
+                    file_path.rename(new_path)
+                
+                # Open file in binary mode for sending
+                with open(new_path, 'rb') as file:
+                    if new_path.suffix.lower() in ['.mp4', '.webm']:
+                        await update.message.reply_video(
+                            video=file,
+                            caption=f"📹 {result.get('title', 'Video')}"
+                        )
+                    elif new_path.suffix.lower() in ['.mp3', '.m4a', '.wav']:
+                        await update.message.reply_audio(
+                            audio=file,
+                            caption=f"🎵 {result.get('title', 'Audio')}"
+                        )
+                    else:
+                        await update.message.reply_document(
+                            document=file,
+                            caption=f"📄 {result.get('title', 'File')}"
+                        )
+
+                # Cleanup if enabled
+                if config.CLEANUP_AFTER_SEND:
+                    new_path.unlink()
+
+                await status_message.delete()
+
+        except FileNotFoundError as e:
             await status_message.edit_text("❌ File not found after download")
-            logger.error(f"File not found: {file_path}")
+            logger.error(f"File not found: {str(e)}")
         except Exception as e:
             await status_message.edit_text(f"❌ Error sending file: {str(e)}")
             logger.error(f"Error sending file: {str(e)}", exc_info=True)
@@ -232,6 +288,72 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'error': str(e)
         })
 
+async def health_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return bot health status as JSON"""
+    try:
+        # Get system metrics
+        process = psutil.Process()
+        memory_info = process.memory_info()
+        
+        # Calculate uptime
+        uptime = datetime.now() - startup_time
+        
+        # Get download stats
+        stats = await download_tracker.get_stats()
+        
+        health_data = {
+            "status": "healthy",
+            "uptime": {
+                "seconds": int(uptime.total_seconds()),
+                "formatted": str(timedelta(seconds=int(uptime.total_seconds())))
+            },
+            "system": {
+                "cpu_percent": psutil.cpu_percent(),
+                "memory": {
+                    "used_mb": memory_info.rss / 1024 / 1024,
+                    "percent": process.memory_percent()
+                },
+                "disk": {
+                    "total_gb": psutil.disk_usage('/').total / (1024 ** 3),
+                    "used_gb": psutil.disk_usage('/').used / (1024 ** 3),
+                    "percent": psutil.disk_usage('/').percent
+                }
+            },
+            "downloaders": {
+                "youtube": bool(youtube_dl),
+                "instagram": bool(instagram_dl),
+                "reddit": bool(reddit_dl),
+                "pinterest": bool(pinterest_dl),
+                "spotify": bool(spotify_dl)
+            },
+            "statistics": {
+                "total_downloads": stats['total_downloads'],
+                "successful_downloads": stats['successful_downloads'],
+                "failed_downloads": stats['failed_downloads'],
+                "success_rate": round(stats['success_rate'], 2),
+                "total_data_downloaded": FileManager.format_size(stats['total_size_bytes']),
+                "downloads_by_platform": stats['downloads_by_platform']
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Send JSON response
+        await update.message.reply_text(
+            json.dumps(health_data, indent=2),
+            parse_mode=None  # Disable markdown/HTML parsing
+        )
+        
+    except Exception as e:
+        error_response = {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+        await update.message.reply_text(
+            json.dumps(error_response, indent=2),
+            parse_mode=None
+        )
+
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle callback queries from inline keyboards."""
     query = update.callback_query
@@ -242,8 +364,68 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Implement settings logic here
         await query.message.edit_text(f"Setting '{setting}' will be implemented soon!")
 
+async def get_health_data() -> Dict:
+    """Get bot health data"""
+    try:
+        # Get system metrics
+        process = psutil.Process()
+        memory_info = process.memory_info()
+        
+        # Calculate uptime
+        uptime = datetime.now() - startup_time
+        
+        # Get download stats
+        stats = await download_tracker.get_stats()
+        
+        return {
+            "status": "healthy",
+            "uptime": {
+                "seconds": int(uptime.total_seconds()),
+                "formatted": str(timedelta(seconds=int(uptime.total_seconds())))
+            },
+            "system": {
+                "cpu_percent": psutil.cpu_percent(),
+                "memory": {
+                    "used_mb": memory_info.rss / 1024 / 1024,
+                    "percent": process.memory_percent()
+                },
+                "disk": {
+                    "total_gb": psutil.disk_usage('/').total / (1024 ** 3),
+                    "used_gb": psutil.disk_usage('/').used / (1024 ** 3),
+                    "percent": psutil.disk_usage('/').percent
+                }
+            },
+            "downloaders": {
+                "youtube": bool(youtube_dl),
+                "instagram": bool(instagram_dl),
+                "reddit": bool(reddit_dl),
+                "pinterest": bool(pinterest_dl),
+                "spotify": bool(spotify_dl)
+            },
+            "statistics": {
+                "total_downloads": stats['total_downloads'],
+                "successful_downloads": stats['successful_downloads'],
+                "failed_downloads": stats['failed_downloads'],
+                "success_rate": round(stats['success_rate'], 2),
+                "total_data_downloaded": FileManager.format_size(stats['total_size_bytes']),
+                "downloads_by_platform": stats['downloads_by_platform']
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+async def health_endpoint(request):
+    """Handle HTTP GET requests to /health endpoint"""
+    data = await get_health_data()
+    return web.json_response(data)
+
 def main():
-    """Start the bot."""
+    """Start the bot and web server"""
     # Create the Application
     application = Application.builder().token(config.BOT_TOKEN).build()
 
@@ -253,11 +435,43 @@ def main():
     application.add_handler(CommandHandler("stats", stats_command))
     application.add_handler(CommandHandler("history", history_command))
     application.add_handler(CommandHandler("settings", settings_command))
+    application.add_handler(CommandHandler("health", health_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_url))
     application.add_handler(CallbackQueryHandler(handle_callback))
 
-    # Start the bot
-    application.run_polling()
+    # Set up web app
+    web_app = web.Application()
+    web_app.router.add_get('/health', health_endpoint)
+    
+    async def start_services():
+        # Start web server
+        runner = web.AppRunner(web_app)
+        await runner.setup()
+        site = web.TCPSite(runner, config.HEALTH_API_HOST, config.HEALTH_API_PORT)
+        await site.start()
+        logger.info(f"Health API started on http://{config.HEALTH_API_HOST}:{config.HEALTH_API_PORT}/health")
+
+    # Initialize the event loop explicitly
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        # Start web server
+        runner = web.AppRunner(web_app)
+        loop.run_until_complete(runner.setup())
+        site = web.TCPSite(runner, config.HEALTH_API_HOST, config.HEALTH_API_PORT)
+        loop.run_until_complete(site.start())
+        logger.info(f"Health API started on http://{config.HEALTH_API_HOST}:{config.HEALTH_API_PORT}/health")
+
+        # Start the bot
+        application.run_polling(
+            allowed_updates=Update.ALL_TYPES,
+            drop_pending_updates=True,
+            close_loop=False
+        )
+    except Exception as e:
+        logger.error(f"Error running application: {e}")
+        raise
 
 if __name__ == '__main__':
     main()

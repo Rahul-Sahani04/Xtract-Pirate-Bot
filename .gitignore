@@ -53,3 +53,5 @@ download_history.json
 # OS specific files
 .DS_Store
 Thumbs.db
+
+.cache
