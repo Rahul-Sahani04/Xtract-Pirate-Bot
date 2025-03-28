@@ -15,10 +15,10 @@ A versatile Telegram bot that can download media content from various social med
 - **Multi-Platform Support** 🌐
   <!-- <img src="assets/platforms.png" alt="Supported Platforms" align="right" width="40%"> -->
   <p align="center">
-  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/youtube.svg" alt="Supported Platforms" width="10%">
-  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/instagram.svg" alt="Supported Platforms" width="10%">
-  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/pinterest.svg" alt="Supported Platforms" width="10%">
-  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/spotify.svg" alt="Supported Platforms" width="10%">
+  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/youtube.svg" alt="Supported Platforms" width="5%">
+  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/instagram.svg" alt="Supported Platforms" width="5%">
+  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/pinterest.svg" alt="Supported Platforms" width="5%">
+  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/spotify.svg" alt="Supported Platforms" width="5%">
   
   <br/>
 
