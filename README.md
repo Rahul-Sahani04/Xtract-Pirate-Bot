@@ -14,19 +14,16 @@ A versatile Telegram bot that can download media content from various social med
 
 - **Multi-Platform Support** 🌐
   <!-- <img src="assets/platforms.png" alt="Supported Platforms" align="right" width="40%"> -->
-  <p align="center">
-  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/youtube.svg" alt="Supported Platforms" width="5%">
-  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/instagram.svg" alt="Supported Platforms" width="5%">
-  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/pinterest.svg" alt="Supported Platforms" width="5%">
-  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/spotify.svg" alt="Supported Platforms" width="5%">
   
-  <br/>
+ 
+  
+  
 
-  - YouTube videos and shorts
-  - Instagram posts, reels, and stories
-  - Reddit posts and comments
-  - Pinterest pins and boards
-  - Spotify songs and playlists
+  -   <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/youtube.svg" alt="Supported Platforms" width="5%"> YouTube videos and shorts
+  -  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/instagram.svg" alt="Supported Platforms" width="5%"> Instagram posts, reels, and stories
+  -   <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/reddit.svg" alt="Supported Platforms" width="5%"> Reddit posts and comments
+  - <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/pinterest.svg" alt="Supported Platforms" width="5%"> Pinterest pins and boards 
+  - <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/spotify.svg" alt="Supported Platforms" width="5%"> Spotify songs and playlists
 
 - **Advanced Features** ⚡
   - Multiple quality options for video downloads
