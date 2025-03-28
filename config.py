@@ -46,8 +46,8 @@ MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB limit for Telegram
 HISTORY_FILE = str(BASE_DIR / "download_history.json")
 
 # Health API Settings
-HEALTH_API_HOST = os.getenv("HEALTH_API_HOST", "localhost")
-HEALTH_API_PORT = int(os.getenv("HEALTH_API_PORT", "8080"))
+HEALTH_API_HOST = os.getenv("HOST", "localhost")
+HEALTH_API_PORT = int(os.getenv("PORT", "8080"))
 
 # Validate required environment variables
 required_vars = [
