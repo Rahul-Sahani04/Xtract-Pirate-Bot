@@ -441,7 +441,7 @@ def main():
 
     # Set up web app
     web_app = web.Application()
-    web_app.router.add_get('/health', health_endpoint)
+    web_app.router.add_get('/monitor-health', health_endpoint)
     
     async def start_services():
         # Start web server
