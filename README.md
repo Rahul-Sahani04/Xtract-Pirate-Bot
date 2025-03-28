@@ -1,17 +1,34 @@
 # Xtract-Pirate-Bot 🏴‍☠️
 
+<div align="center">
+  <img src="assets/banner.png" alt="Xtract-Pirate-Bot Banner" width="100%">
+</div>
+
 A versatile Telegram bot that can download media content from various social media platforms. Supports YouTube, Instagram, Reddit, Pinterest, and Spotify. Arrr! Let's plunder some content! 🦜
+
+<!-- <div align="center">
+  <img src="assets/demo.gif" alt="Bot Demo" width="70%">
+</div> -->
 
 ## Features
 
-- **Multi-Platform Support**
+- **Multi-Platform Support** 🌐
+  <!-- <img src="assets/platforms.png" alt="Supported Platforms" align="right" width="40%"> -->
+  <p align="center">
+  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/youtube.svg" alt="Supported Platforms" width="10%">
+  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/instagram.svg" alt="Supported Platforms" width="10%">
+  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/pinterest.svg" alt="Supported Platforms" width="10%">
+  <img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/filled/spotify.svg" alt="Supported Platforms" width="10%">
+  
+  <br/>
+
   - YouTube videos and shorts
   - Instagram posts, reels, and stories
   - Reddit posts and comments
   - Pinterest pins and boards
   - Spotify songs and playlists
 
-- **Advanced Features**
+- **Advanced Features** ⚡
   - Multiple quality options for video downloads
   - Batch downloads from playlists/collections
   - Progress updates during downloads
@@ -19,6 +36,12 @@ A versatile Telegram bot that can download media content from various social med
   - Usage statistics
   - Organized folder structure
   - Automatic file cleanup
+
+<!-- ## Demo
+
+<div align="center">
+  <img src="assets/usage.png" alt="Usage Example" width="80%">
+</div> -->
 
 ## Setup
 
@@ -34,6 +57,7 @@ pip install -r requirements.txt
 ```
 
 3. Set up environment variables:
+   <!-- <img src="assets/env-setup.png" alt="Environment Setup" align="right" width="40%"> -->
    - Copy `.env.example` to `.env`:
      ```bash
      cp .env.example .env
@@ -59,6 +83,10 @@ python bot.py
 
 ## Usage
 
+<div align="center">
+  <img src="assets/commands.png" alt="Bot Commands" width="80%">
+</div>
+
 1. Start the bot in Telegram: `/start`
 2. Send any supported URL to download content
 3. Select quality options if prompted
@@ -75,30 +103,43 @@ python bot.py
 ## Supported URL Formats
 
 ### YouTube
+<img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/colored/youtube.svg" alt="YouTube Support" align="right" width="30%">
+
 - Regular videos: `https://www.youtube.com/watch?v=VIDEO_ID`
 - Shorts: `https://www.youtube.com/shorts/VIDEO_ID`
 - Playlists: `https://www.youtube.com/playlist?list=PLAYLIST_ID`
 
 ### Instagram
+<img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/colored/instagram.svg" alt="Instagram Support" align="right" width="30%">
+
 - Posts (regular): `https://www.instagram.com/p/POST_ID/`
 - Pins (short URL): `https://pin.it/SHORTCODE`
 - Boards: `https://www.pinterest.com/USERNAME/BOARD_NAME/`
 
 ### Reddit
+<img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/colored/reddit.svg" alt="Reddit Support" align="right" width="30%">
 - Posts: `https://www.reddit.com/r/SUBREDDIT/comments/POST_ID/`
 - Subreddits: `https://www.reddit.com/r/SUBREDDIT/`
 
 ### Pinterest
+<img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/colored/pinterest.svg" alt="Pinterest Support" align="right" width="30%">
+
 - Pins (regular): `https://www.pinterest.com/pin/PIN_ID/`
 - Pins (short URL): `https://pin.it/SHORTCODE`
 - Boards: `https://www.pinterest.com/USERNAME/BOARD_NAME/`
 
 ### Spotify
+<img src="https://raw.githubusercontent.com/CLorant/readme-social-icons/main/large/colored/spotify.svg" alt="Spotify Support" align="right" width="30%">
+
 - Tracks: `https://open.spotify.com/track/TRACK_ID`
 - Playlists: `https://open.spotify.com/playlist/PLAYLIST_ID`
 - Albums: `https://open.spotify.com/album/ALBUM_ID`
 
 ## API Requirements
+
+<!-- <div align="center">
+  <img src="assets/api-setup.png" alt="API Setup" width="80%">
+</div> -->
 
 1. **Telegram Bot API**
    - Create a bot through [@BotFather](https://t.me/BotFather)
@@ -130,6 +171,10 @@ python bot.py
 
 ## Configuration
 
+<div align="center">
+  <img src="assets/config.png" alt="Configuration" width="80%">
+</div>
+
 All configuration is managed through environment variables in the `.env` file:
 
 ```bash
@@ -157,6 +202,10 @@ CLEANUP_AFTER_SEND=true
 
 ## Contributing
 
+<!-- <div align="center">
+  <img src="assets/contribute.png" alt="Contributing" width="60%">
+</div> -->
+
 1. Fork the repository
 2. Create a feature branch
 3. Commit your changes
@@ -164,6 +213,10 @@ CLEANUP_AFTER_SEND=true
 5. Create a Pull Request
 
 ## Author
+
+<div align="center">
+  <img src="assets/PirateCatLogo.jpeg" alt="Author" width="200px" style="border-radius: 50%;">
+</div>
 
 👨‍💻 **Rahul Sahani**
 - GitHub: [@Rahul-Sahani04](https://github.com/Rahul-Sahani04)
@@ -175,3 +228,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Disclaimer
 
 This bot is for educational purposes only. Be sure to comply with each platform's terms of service and API usage guidelines. The developers are not responsible for any misuse of this bot.
+
+<!-- <div align="center">
+  <img src="assets/footer.png" alt="Footer" width="100%">
+</div> -->
